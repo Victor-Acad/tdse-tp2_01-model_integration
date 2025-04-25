@@ -168,33 +168,69 @@ void task_sensor_update(void *parameters)
 
 			switch (p_task_sensor_dta->state)
 			{
-				case ST_BTN_XX_UP:
+			case ST_BTN_XX_UP:
 
-					if (EV_BTN_XX_DOWN == p_task_sensor_dta->event)
-					{
-						put_event_task_system(p_task_sensor_cfg->signal_down);
+				if (EV_BTN_XX_DOWN == p_task_sensor_dta->event)
+				{
+					p_task_sensor_dta->state = ST_BTN_XX_FALLING;
+					p_task_sensor_dta->tick = p_task_sensor_cfg->tick_max;
+				}
+
+				break;
+
+			case ST_BTN_XX_FALLING:
+
+				if (p_task_sensor_dta->tick > 0) {
+					p_task_sensor_dta->tick--;
+					p_task_sensor_dta->state = ST_BTN_XX_FALLING;
+				} else
+
+				if (p_task_sensor_dta->tick == 0) {
+
+					if (EV_BTN_XX_DOWN == p_task_sensor_dta->event) {
 						p_task_sensor_dta->state = ST_BTN_XX_DOWN;
-					}
+						put_event_task_system(p_task_sensor_cfg->signal_down);
+						// put_event_task_system();
+					} else
 
-					break;
-
-				case ST_BTN_XX_FALLING:
-
-					break;
-
-				case ST_BTN_XX_DOWN:
-
-					if (EV_BTN_XX_UP == p_task_sensor_dta->event)
-					{
-						put_event_task_system(p_task_sensor_cfg->signal_up);
+					if (EV_BTN_XX_UP == p_task_sensor_dta->event) {
 						p_task_sensor_dta->state = ST_BTN_XX_UP;
 					}
 
-					break;
+				}
 
-				case ST_BTN_XX_RISING:
+				break;
 
-					break;
+			case ST_BTN_XX_DOWN:
+
+				if (EV_BTN_XX_UP == p_task_sensor_dta->event)
+				{
+					p_task_sensor_dta->state = ST_BTN_XX_RISING;
+					p_task_sensor_dta->tick = p_task_sensor_cfg->tick_max;
+				}
+
+				break;
+
+			case ST_BTN_XX_RISING:
+
+				if (p_task_sensor_dta->tick > 0) {
+					p_task_sensor_dta->tick--;
+					p_task_sensor_dta->state = ST_BTN_XX_RISING;
+				} else
+
+				if (p_task_sensor_dta->tick == 0) {
+
+					if (EV_BTN_XX_DOWN == p_task_sensor_dta->event) {
+						p_task_sensor_dta->state = ST_BTN_XX_DOWN;
+					} else
+
+					if (EV_BTN_XX_UP == p_task_sensor_dta->event) {
+						p_task_sensor_dta->state = ST_BTN_XX_UP;
+						put_event_task_system(p_task_sensor_cfg->signal_up);
+						// put_event_task_system
+					}
+
+				}
 
 				default:
 
